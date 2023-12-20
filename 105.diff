@@ -1,0 +1,44 @@
+  Helpful Cinnabar Anteater
+  
+  medium
+  
+  # A team can have an infinite number of players in their squad
+  
+- ## Summary
++ ## Summary
+?           +
+- a team can have as many players as they want to by simply minting new academy players
++ a team can have as many players as they want to by simply minting new academy players
+?                                                                                      +
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- there is no maximum number of players that a team can have which means each team can have infinite number of players 
++ there is no maximum number of players that a team can have which means each team can have infinite number of players 
+?                                                                                                                      +
+- ## Impact
++ ## Impact
+?          +
+- makes the game less fun, if a player is injured or gets a red card you can easily replace them 
++ makes the game less fun, if a player is injured or gets a red card you can easily replace them 
+?                                                                                                +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L96
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L96
+?                                                                                                                   +
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  you should enforce a maximum number of players per team

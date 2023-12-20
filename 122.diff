@@ -1,0 +1,147 @@
+  Sharp Misty Wombat
+  
+  high
+  
+  # If the owner change the merkleRoot in FootiumPrizeDistributor all funds hat are saved in the root will vanish
+  
+- ## Summary
++ ## Summary
+?           +
+- IF the owner change the merkleRoot in FootiumPrizeDistributor all funds hat are saved in the root will vanish
++ IF the owner change the merkleRoot in FootiumPrizeDistributor all funds hat are saved in the root will vanish
+?                                                                                                              +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- If the erc20MerkleRoot is changed by the contract owner using the setERC20MerkleRoot function, the claimERC20Prize function will only work for new proofs that match the new erc20MerkleRoot. Any proofs that were valid for the old merkle root will no longer be valid, and claims using those proofs will fail with the InvalidERC20MerkleProof error.
++ If the erc20MerkleRoot is changed by the contract owner using the setERC20MerkleRoot function, the claimERC20Prize function will only work for new proofs that match the new erc20MerkleRoot. Any proofs that were valid for the old merkle root will no longer be valid, and claims using those proofs will fail with the InvalidERC20MerkleProof error.
+?                                                                                                                                                                                                                                                                                                                                                          +
+- 
++ 
+- This corresponds and for the EthMerkleRoot
++ This corresponds and for the EthMerkleRoot
+?                                           +
+- 
++ 
+- it("if the owner change the merkleRoot users cannot take their prize", async () => {
++ it("if the owner change the merkleRoot users cannot take their prize", async () => {
+?                                                                                     +
+- const leaf = hashERC20PrizeInputs([
++ const leaf = hashERC20PrizeInputs([
+?                                    +
+- token.address,
++ token.address,
+?               +
+- addr1.address,
++ addr1.address,
+?               +
+- INITIAL_AMOUNT
++ INITIAL_AMOUNT
+?               +
+- ]);
++ ]);
+?    +
+- const proof = erc20MerkleTree.getHexProof(leaf);
++ const proof = erc20MerkleTree.getHexProof(leaf);
+?                                                 +
+- 
++ 
+-         const newRoot = getRandomBytes32();
++         const newRoot = getRandomBytes32();
+?                                            +
+-         console.log(erc20MerkleTree, "<- first time")
++         console.log(erc20MerkleTree, "<- first time")
+?                                                      +
+-         await expect(distributor.setERC20MerkleRoot(newRoot))
++         await expect(distributor.setERC20MerkleRoot(newRoot))
+?                                                              +
+-             .to.emit(distributor, "SetERC20MerkleRoot")
++             .to.emit(distributor, "SetERC20MerkleRoot")
+?                                                        +
+-             .withArgs(newRoot);
++             .withArgs(newRoot);
+?                                +
+- 
++ 
+-         await distributor.setERC20MerkleRoot(erc20MerkleTree.getHexRoot());
++         await distributor.setERC20MerkleRoot(erc20MerkleTree.getHexRoot());
+?                                                                            +
+- 
++ 
+-         console.log(erc20MerkleTree, "<- second time")
++         console.log(erc20MerkleTree, "<- second time")
+?                                                       +
+- 
++ 
+-         await expect(
++         await expect(
+?                      +
+-             distributor
++             distributor
+?                        +
+-                 .connect(addr1)
++                 .connect(addr1)
+?                                +
+-                 .claimERC20Prize(
++                 .claimERC20Prize(
+?                                  +
+-                     addr1.address,
++                     addr1.address,
+?                                   +
+-                     token.address,
++                     token.address,
+?                                   +
+-                     INITIAL_AMOUNT,
++                     INITIAL_AMOUNT,
+?                                    +
+-                     proof
++                     proof
+?                          +
+-                 )
++                 )
+?                  +
+-         )
++         )
+?          +
+-             .to.emit(distributor, "ClaimERC20")
++             .to.emit(distributor, "ClaimERC20")
+?                                                +
+-             .withArgs(token.address, addr1.address, INITIAL_AMOUNT);
++             .withArgs(token.address, addr1.address, INITIAL_AMOUNT);
+?                                                                     +
+-     });
++     });
+?        +
+- ## Impact
++ ## Impact
+?          +
+- Loss of funds
++ Loss of funds
+?              +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L109-L145
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L109-L145
+?                                                                                                                                  +
+- 
++ 
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L82
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L82
+?                                                                                                                            +
+- ## Tool used
++ ## Tool used
+?             +
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  While updating the merkleRoot, ensure that there is no valid proofs anymore, or the owner can transfer the proofs to the new merkleroot

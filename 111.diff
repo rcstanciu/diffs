@@ -1,0 +1,196 @@
+  Sour Cobalt Tardigrade
+  
+  medium
+  
+  # Gas Inefficiency and Lack of Event Emission in Withdraw Function (Large Transaction + No Event).
+  
+- ## Summary
++ ## Summary
+?           +
+- The withdraw function is missing gas optimization and event emission, which could affect the performance and usability of the contract.
++ The withdraw function is missing gas optimization and event emission, which could affect the performance and usability of the contract.
+?                                                                                                                                        +
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- The withdraw function sends the entire contract balance in one large transaction, which might be gas-intensive and prone to failure. A better approach would be to use a withdrawal pattern, where each user can withdraw their own share of the contract balance, instead of sending the entire balance to the owner. This would reduce the gas cost and improve the security of the contract.
++ The withdraw function sends the entire contract balance in one large transaction, which might be gas-intensive and prone to failure. A better approach would be to use a withdrawal pattern, where each user can withdraw their own share of the contract balance, instead of sending the entire balance to the owner. This would reduce the gas cost and improve the security of the contract.
+?                                                                                                                                                                                                                                                                                                                                                                                                +
+- 
++ 
+- The withdraw function also doesn’t emit any event informing users or external tools about the withdrawal. This could affect the usability and transparency of the contract, as users would not be able to track or verify the withdrawals. Emitting an event with relevant information like timestamp, amount withdrawn, and owner address would improve the user experience and accountability of the contract.
++ The withdraw function also doesn’t emit any event informing users or external tools about the withdrawal. This could affect the usability and transparency of the contract, as users would not be able to track or verify the withdrawals. Emitting an event with relevant information like timestamp, amount withdrawn, and owner address would improve the user experience and accountability of the contract.
+?                                                                                                                                                                                                                                                                                                                                                                                                                 +
+- ## Impact
++ ## Impact
+?          +
+- The gas inefficiency and lack of event emission could result in higher transaction fees, lower reliability, and lower user satisfaction for the contract.
++ The gas inefficiency and lack of event emission could result in higher transaction fees, lower reliability, and lower user satisfaction for the contract.
+?                                                                                                                                                          +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L144-L152
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumAcademy.sol#L144-L152
+?                                                                                                                         +
+- ## Tool used
++ ## Tool used
+?             +
+- - Manual Review
++ - Manual Review
+?                +
+- ## Test case
++ ## Test case
+?             +
+- ```solidity
++ ```solidity
+?            +
+- // The contract owner
++ // The contract owner
+?                      +
+- address owner = 0x1234;
++ address owner = 0x1234;
+?                        +
+- // The contract balance
++ // The contract balance
+?                        +
+- uint256 balance = 10 ether;
++ uint256 balance = 10 ether;
+?                            +
+- // The withdraw function
++ // The withdraw function
+?                         +
+- function withdraw() external onlyOwner {
++ function withdraw() external onlyOwner {
+?                                         +
+-   uint256 balance = address(this).balance;
++   uint256 balance = address(this).balance;
+?                                           +
+-   if (balance > 0) {
++   if (balance > 0) {
+?                     +
+-     (bool sent, ) = payable(owner()).call{value: balance}("");
++     (bool sent, ) = payable(owner()).call{value: balance}("");
+?                                                               +
+-     if (!sent) {
++     if (!sent) {
+?                 +
+-       revert FailedToSendETH(balance);
++       revert FailedToSendETH(balance);
+?                                       +
+-     }
++     }
+?      +
+-   }
++   }
+?    +
+- }
++ }
+?  +
+- 
++ 
+- ```
++ ```
+?    +
+- ## Logs
++ ## Logs
+?        +
+- ```javascript
++ ```javascript
+?              +
+- Owner calls withdraw()...
++ Owner calls withdraw()...
+?                          +
+- Owner receives 10 ether...
++ Owner receives 10 ether...
+?                           +
+- No event emitted...
++ No event emitted...
+?                    +
+- 
++ 
+- ```
++ ```
+?    +
+- ## Recommendation
++ ## Recommendation
+?                  +
+- ```solidity
++ ```solidity
+?            +
+- // Declare a mapping to store each user's balance
++ // Declare a mapping to store each user's balance
+?                                                  +
+- mapping(address => uint256) public balances;
++ mapping(address => uint256) public balances;
+?                                             +
+- 
++ 
+- // ...
++ // ...
+?       +
+- 
++ 
+- // Update the user's balance when they deposit or receive funds
++ // Update the user's balance when they deposit or receive funds
+?                                                                +
+- function deposit() external payable {
++ function deposit() external payable {
+?                                      +
+-   balances[msg.sender] += msg.value;
++   balances[msg.sender] += msg.value;
+?                                     +
+- }
++ }
+?  +
+- 
++ 
+- // ...
++ // ...
+?       +
+- 
++ 
+- // Allow each user to withdraw their own balance
++ // Allow each user to withdraw their own balance
+?                                                 +
+- function withdraw() external {
++ function withdraw() external {
+?                               +
+-   uint256 amount = balances[msg.sender];
++   uint256 amount = balances[msg.sender];
+?                                         +
+-   require(amount > 0, "No balance to withdraw");
++   require(amount > 0, "No balance to withdraw");
+?                                                 +
+-   // Update the state variable before sending
++   // Update the state variable before sending
+?                                              +
+-   balances[msg.sender] = 0;
++   balances[msg.sender] = 0;
+?                            +
+-   // Use transfer instead of call for better security
++   // Use transfer instead of call for better security
+?                                                      +
+-   payable(msg.sender).transfer(amount);
++   payable(msg.sender).transfer(amount);
+?                                        +
+-   // Emit an event to inform about the withdrawal
++   // Emit an event to inform about the withdrawal
+?                                                  +
+-   emit Withdrawal(msg.sender, amount, block.timestamp);
++   emit Withdrawal(msg.sender, amount, block.timestamp);
+?                                                        +
+- }
++ }
+?  +
+- 
++ 
+- // Declare an event to inform about the withdrawal
++ // Declare an event to inform about the withdrawal
+?                                                   +
+- event Withdrawal(address indexed user, uint256 amount, uint256 timestamp);
++ event Withdrawal(address indexed user, uint256 amount, uint256 timestamp);
+?                                                                           +
+- 
++ 
+  ```

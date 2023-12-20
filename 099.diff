@@ -1,0 +1,44 @@
+  Helpful Cinnabar Anteater
+  
+  high
+  
+  # FootiumPrizeDistributor.claimETHPrize lacks payable keyword
+  
+- ## Summary
++ ## Summary
+?           +
+- `FootiumPrizeDistributor.claimETHPrize` lacks payable keyword
++ `FootiumPrizeDistributor.claimETHPrize` lacks payable keyword
+?                                                              +
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- in the FootiumPrizeDistributor contract, there is function called claimETHPrize which is responsible for sending the prize money in ETH to the prize winner, however the `_to` parameter lacks the payable keyword which makes sure that the receiver can accept the eth
++ in the FootiumPrizeDistributor contract, there is function called claimETHPrize which is responsible for sending the prize money in ETH to the prize winner, however the `_to` parameter lacks the payable keyword which makes sure that the receiver can accept the eth
+?                                                                                                                                                                                                                                                                         +
+- ## Impact
++ ## Impact
+?          +
+- eth will never be sent to the receiver
++ eth will never be sent to the receiver
+?                                       +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L194
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L194
+?                                                                                                                                  +
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  add payable keyword

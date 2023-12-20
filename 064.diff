@@ -1,0 +1,101 @@
+  Unique Rose Platypus
+  
+  high
+  
+  # Handling of Zero Hashes
+  
+- ### Handling of Zero Hashes
++ ### Handling of Zero Hashes
+?                            +
+- 
+- 
++ 
++ 
+- ---
++ ---
+?    +
+- name: Handling of Zero Hashes
++ name: Handling of Zero Hashes
+?                              +
+- about: Handling of zero hashes in Merkle proofs
++ about: Handling of zero hashes in Merkle proofs
+?                                                +
+- title: Handling of Zero Hashes
++ title: Handling of Zero Hashes
+?                               +
+- labels: Vulnerability, Merkle Tree
++ labels: Vulnerability, Merkle Tree
+?                                   +
+- assignees: ""
++ assignees: ""
+?              +
+- 
++ 
+- ## Summary
++ ## Summary
+?           +
+- The contract lacks explicit handling for zero hash values within the Merkle tree functions.
++ The contract lacks explicit handling for zero hash values within the Merkle tree functions.
+?                                                                                            +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- The absence of checks for zero hash values within the Merkle tree functions (`claimERC20Prize` and `claimETHPrize`) can lead to unintended behavior or vulnerabilities.
++ The absence of checks for zero hash values within the Merkle tree functions (`claimERC20Prize` and `claimETHPrize`) can lead to unintended behavior or vulnerabilities.
+?                                                                                                                                                                        +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- Potential risk of unexpected behavior or vulnerabilities due to zero hash values not being properly handled within the Merkle proof verification process.
++ Potential risk of unexpected behavior or vulnerabilities due to zero hash values not being properly handled within the Merkle proof verification process.
+?                                                                                                                                                          +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- ```solidity
++ ```solidity
+?            +
+- function claimETHPrize(
++ function claimETHPrize(
+?                        +
+-     // ... existing parameters ...
++     // ... existing parameters ...
+?                                   +
+- ) external whenNotPaused nonReentrant {
++ ) external whenNotPaused nonReentrant {
+?                                        +
+-     // Check for non-zero hash
++     // Check for non-zero hash
+?                               +
+-     require(keccak256(abi.encode(_to, _amount)) != bytes32(0), "Zero hash not allowed");
++     require(keccak256(abi.encode(_to, _amount)) != bytes32(0), "Zero hash not allowed");
+?                                                                                         +
+- 
++ 
+-     // ... existing code ...
++     // ... existing code ...
+?                             +
+- }
++ }
+?  +
+- ```
++ ```
+?    +
+- ## Tool used
++ ## Tool used
+?             +
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  Implement checks within the Merkle tree functions to properly handle zero hash values to prevent unexpected behavior or vulnerabilities.

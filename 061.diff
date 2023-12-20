@@ -1,0 +1,103 @@
+  Unique Rose Platypus
+  
+  medium
+  
+  # Lack of Event Emittance on Withdrawal
+  
+- ---
++ ---
+?    +
+- name: Lack of Event Emittance on Withdrawal
++ name: Lack of Event Emittance on Withdrawal
+?                                            +
+- about: Missing event emission on successful fund withdrawal
++ about: Missing event emission on successful fund withdrawal
+?                                                            +
+- title: Lack of Event Emittance on Withdrawal
++ title: Lack of Event Emittance on Withdrawal
+?                                             +
+- labels: Vulnerability, Transparency
++ labels: Vulnerability, Transparency
+?                                    +
+- assignees: ""
++ assignees: ""
+?              +
+- ---
++ ---
+?    +
+- 
++ 
+- ## Summary
++ ## Summary
+?           +
+- The contract does not emit an event upon successful withdrawal of funds, reducing transparency in fund movement tracking.
++ The contract does not emit an event upon successful withdrawal of funds, reducing transparency in fund movement tracking.
+?                                                                                                                          +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- Absence of an event emission after a successful withdrawal in the withdraw function makes it challenging to track and verify fund movements, reducing contract transparency.
++ Absence of an event emission after a successful withdrawal in the withdraw function makes it challenging to track and verify fund movements, reducing contract transparency.
+?                                                                                                                                                                             +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- Lack of event emission might lead to difficulties in auditing or monitoring the contract's fund movements, reducing transparency and accountability.
++ Lack of event emission might lead to difficulties in auditing or monitoring the contract's fund movements, reducing transparency and accountability.
+?                                                                                                                                                     +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- solidity
++ solidity
+?         +
+- Copy code
++ Copy code
+?          +
+- function withdraw() external onlyOwner {
++ function withdraw() external onlyOwner {
+?                                         +
+-     //...existing code...
++     //...existing code...
+?                          +
+- 
++ 
+-     // Example of missing event emission:
++     // Example of missing event emission:
+?                                          +
+-     (bool sent, ) = payable(owner()).call{value: balance}("");
++     (bool sent, ) = payable(owner()).call{value: balance}("");
+?                                                               +
+-     if (!sent) {
++     if (!sent) {
+?                 +
+-         revert FailedToSendETH(balance);
++         revert FailedToSendETH(balance);
+?                                         +
+-     }
++     }
+?      +
+-     // Missing event emission after successful withdrawal
++     // Missing event emission after successful withdrawal
+?                                                          +
+- }
++ }
+?  +
+- ## Tool used
++ ## Tool used
+?             +
+- ## Manual Review
++ ## Manual Review
+?                 +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  Include an event emission after a successful withdrawal to provide transparency and facilitate auditing of fund movements within the contract.

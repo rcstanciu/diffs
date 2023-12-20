@@ -1,0 +1,143 @@
+  Glorious Shamrock Goldfish
+  
+  medium
+  
+  # Recommended to delete the use of CountersUpgradeable::_tokenIdCounter , it has been deleted in the latest OZ library
+  
+- ## Summary
++ ## Summary
+?           +
+- Recommended to delete the use of CountersUpgradeable.Counter, the `CountersUpgradeable `has been deleted in the latest OZ library
++ Recommended to delete the use of CountersUpgradeable.Counter, the `CountersUpgradeable `has been deleted in the latest OZ library
+?                                                                                                                                  +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- Accounting this OpenZeppelin fiexd issue
++ Accounting this OpenZeppelin fiexd issue
+?                                         +
+- https://github.com/OpenZeppelin/openzeppelin-contracts/issues/4233#issuecomment-1567536193
++ https://github.com/OpenZeppelin/openzeppelin-contracts/issues/4233#issuecomment-1567536193
+?                                                                                           +
+- 
++ 
+- ```markdown
++ ```markdown
+?            +
+- because the inner struct members are directly modifiable bypassing the struct interface. Additionally, a Counter being a uint256 value occupies an entire storage slot whereas in most occasions packing a counter in storage with other values will be a far larger optimization than removing overflow checks;
++ because the inner struct members are directly modifiable bypassing the struct interface. Additionally, a Counter being a uint256 value occupies an entire storage slot whereas in most occasions packing a counter in storage with other values will be a far larger optimization than removing overflow checks;
+?                                                                                                                                                                                                                                                                                                                 +
+- ```
++ ```
+?    +
+- 
++ 
+- the `Counters.sol` contract has been removed , and recommend to use handwrite `++tokenid` method.
++ the `Counters.sol` contract has been removed , and recommend to use handwrite `++tokenid` method.
+?                                                                                                  +
+- 
+- 
++ 
++ 
+- ## Impact
++ ## Impact
+?          +
+- New announced Solidity features might allow replicating the behavior without the Counters.sol contract (eg. User Defined Types), and a Counter being a uint256 value occupies an entire storage slot , cost more gas consumption
++ New announced Solidity features might allow replicating the behavior without the Counters.sol contract (eg. User Defined Types), and a Counter being a uint256 value occupies an entire storage slot , cost more gas consumption
+?                                                                                                                                                                                                                                 +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L61-L71
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L61-L71
+?                                                                                                                      +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+-    tokenId = _tokenIdCounter.current();
++    tokenId = _tokenIdCounter.current();
+?                                        +
+-         _tokenIdCounter.increment();
++         _tokenIdCounter.increment();
+?                                     +
+-         _safeMint(to, tokenId);
++         _safeMint(to, tokenId);
+?                                +
+- ```
++ ```
+?    +
+- 
++ 
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review, VSCode
++ Manual Review, VSCode
+?                      +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+- use a hand writted counter state varible to store current tokenId
++ use a hand writted counter state varible to store current tokenId
+?                                                                  +
+- code example
++ code example
+?             +
+- ```solidity
++ ```solidity
+?            +
+-     uint256 private _tokenIdCounter;
++     uint256 private _tokenIdCounter;
+?                                     +
+- 
++ 
+-     function safeMint(address to)
++     function safeMint(address to)
+?                                  +
+-         external
++         external
+?                 +
+-         onlyRole(MINTER_ROLE)
++         onlyRole(MINTER_ROLE)
+?                              +
+-         nonReentrant
++         nonReentrant
+?                     +
+-         whenNotPaused
++         whenNotPaused
+?                      +
+-         returns (uint256 tokenId)
++         returns (uint256 tokenId)
+?                                  +
+-     {
++     {
+?      +
+-         uint256 tokenId = _tokenIdCounter;
++         uint256 tokenId = _tokenIdCounter;
+?                                           +
+-             _safeMint(_receiver, tokenId);
++             _safeMint(_receiver, tokenId);
+?                                           +
+-             _tokenIdCounter += 1;
++             _tokenIdCounter += 1;
+?                                  +
+-     }
++     }
+?      +
+- 
++ 
+- ```
++ ```
+?    +
+- 
++ 

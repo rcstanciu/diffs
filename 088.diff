@@ -1,0 +1,121 @@
+  Refined Lime Flamingo
+  
+  medium
+  
+  # No check for `paymentReceiver == address(0)` can result in lost funds
+  
+- ## Summary
++ ## Summary
+?           +
+- Inside [FootiumGeneralPaymentContract.sol](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L20C20-L20C42) there is a storage variable responsible for receiving [payments](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L101). But there are no validation whether it has already been initialised and if the provided address is valid. 
++ Inside [FootiumGeneralPaymentContract.sol](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L20C20-L20C42) there is a storage variable responsible for receiving [payments](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L101). But there are no validation whether it has already been initialised and if the provided address is valid. 
+?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         +
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- The contract is upgradable, which means that `initialize` function should be called and used as a constructor and prior to this call the contract is available and functional and everybody can call it's functions. Which is a problem when there are payment functions. Those functions never check whether the contract has already been initialised. Another problem here is that [`setPaymentReceiverAddress`](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L52)  never check if the provided argument is a valid address (!= address(0)), which is best practice and is easily implemented.
++ The contract is upgradable, which means that `initialize` function should be called and used as a constructor and prior to this call the contract is available and functional and everybody can call it's functions. Which is a problem when there are payment functions. Those functions never check whether the contract has already been initialised. Another problem here is that [`setPaymentReceiverAddress`](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L52)  never check if the provided argument is a valid address (!= address(0)), which is best practice and is easily implemented.
+?                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   +
+- ## Impact
++ ## Impact
+?          +
+- Lost of funds for protocol in case of payment to address(0)
++ Lost of funds for protocol in case of payment to address(0)
+?                                                            +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L52-L56
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L52-L56
+?                                                                                                                                      +
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+- Check for contract being initiallized and for address(0) when setting `paymentReceiverAddress`:
++ Check for contract being initiallized and for address(0) when setting `paymentReceiverAddress`:
+?                                                                                                +
+- ```diff
++ ```diff
+?        +
+-     function initialize(
++     function initialize(
+?                         +
+-         address _paymentReceiverAddress,
++         address _paymentReceiverAddress,
+?                                         +
+-         IFootiumClub _footiumClub
++         IFootiumClub _footiumClub
+?                                  +
+-     ) external initializer {
++     ) external initializer {
+?                             +
+- +        require(_paymentReceiverAddress != address(0)
++ +        require(_paymentReceiverAddress != address(0)
+?                                                       +
+-         __Pausable_init();
++         __Pausable_init();
+?                           +
+-         __ReentrancyGuard_init();
++         __ReentrancyGuard_init();
+?                                  +
+-         __Ownable_init();
++         __Ownable_init();
+?                          +
+- 
++ 
+-         paymentReceiverAddress = _paymentReceiverAddress;
++         paymentReceiverAddress = _paymentReceiverAddress;
+?                                                          +
+-         footiumClub = _footiumClub;
++         footiumClub = _footiumClub;
+?                                    +
+-     }
++     }
+?      +
+- ```
++ ```
+?    +
+- 
++ 
+- ```diff
++ ```diff
+?        +
+-     function setPaymentReceiverAddress(address _paymentReceiverAddress)
++     function setPaymentReceiverAddress(address _paymentReceiverAddress)
+?                                                                        +
+-         external
++         external
+?                 +
+-         onlyOwner
++         onlyOwner
+?                  +
+-     {
++     {
+?      +
+- +       require(_paymentReceiverAddress != address(0)
++ +       require(_paymentReceiverAddress != address(0)
+?                                                      +
+-         paymentReceiverAddress = _paymentReceiverAddress;
++         paymentReceiverAddress = _paymentReceiverAddress;
+?                                                          +
+- 
++ 
+-         emit PaymentReceiverUpdated(paymentReceiverAddress);
++         emit PaymentReceiverUpdated(paymentReceiverAddress);
+?                                                             +
+-     }
++     }
+?      +
+- ```
++ ```
+?    +

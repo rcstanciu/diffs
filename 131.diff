@@ -1,0 +1,81 @@
+  Spicy Lipstick Mink
+  
+  medium
+  
+  # EIP2981 is not compatible on Clubs, resulting a loss of yield for the team.
+  
+- ## Summary
++ ## Summary
+?           +
+- 
++ 
+- Players have a royalty built in but clubs do not. This allows bulk sale of players via clubs to bypass the fee when selling players.
++ Players have a royalty built in but clubs do not. This allows bulk sale of players via clubs to bypass the fee when selling players.
+?                                                                                                                                     +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- 
++ 
+-     contract FootiumClub is
++     contract FootiumClub is
+?                            +
+-     ERC721Upgradeable,
++     ERC721Upgradeable,
+?                       +
+-     AccessControlUpgradeable,
++     AccessControlUpgradeable,
+?                              +
+-     PausableUpgradeable,
++     PausableUpgradeable,
+?                         +
+-     ReentrancyGuardUpgradeable,
++     ReentrancyGuardUpgradeable,
+?                                +
+-     OwnableUpgradeable
++     OwnableUpgradeable
+?                       +
+- 
++ 
+- This allows users to sell players by selling their club to avoid any kind of fee on player sales.
++ This allows users to sell players by selling their club to avoid any kind of fee on player sales.
+?                                                                                                  +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- 
++ 
+- Team receives less money than deserved.
++ Team receives less money than deserved.
+?                                        +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L16-L22
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L16-L22
+?                                                                                                                      +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L19
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L19
+?                                                                                                                    +
+- 
++ 
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  Implement EIP2981 on clubs as well

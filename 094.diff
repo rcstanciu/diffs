@@ -1,0 +1,126 @@
+  Dancing Khaki Narwhal
+  
+  medium
+  
+  # Users can bypass Player royalties on EIP2981 compatible markets.
+  
+- ## Summary
++ ## Summary
+?           +
+- `FootiumClub` lacks royalty information, makes it possible to sale players via clubs to bypass the fee when selling players.
++ `FootiumClub` lacks royalty information, makes it possible to sale players via clubs to bypass the fee when selling players.
+?                                                                                                                             +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- 
++ 
+- `FootiumPlayer` implements the EIP2981 standard while `FootiumClub` implements the ERC721 standard.
++ `FootiumPlayer` implements the EIP2981 standard while `FootiumClub` implements the ERC721 standard.
+?                                                                                                    +
+- 
++ 
+-     //FootiumClub.sol
++     //FootiumClub.sol
+?                      +
+-     contract FootiumClub is
++     contract FootiumClub is
+?                            +
+-         ERC721Upgradeable,
++         ERC721Upgradeable,
+?                           +
+-         AccessControlUpgradeable,
++         AccessControlUpgradeable,
+?                                  +
+-         PausableUpgradeable,
++         PausableUpgradeable,
+?                             +
+-         ReentrancyGuardUpgradeable,
++         ReentrancyGuardUpgradeable,
+?                                    +
+-         OwnableUpgradeable
++         OwnableUpgradeable
+?                           +
+- 
++ 
+-     //FootiumPlayer.sol
++     //FootiumPlayer.sol
+?                        +
+-     contract FootiumPlayer is
++     contract FootiumPlayer is
+?                              +
+-         ERC721Upgradeable,
++         ERC721Upgradeable,
+?                           +
+-         AccessControlUpgradeable,
++         AccessControlUpgradeable,
+?                                  +
+-         ERC2981Upgradeable,
++         ERC2981Upgradeable,
+?                            +
+-         PausableUpgradeable,
++         PausableUpgradeable,
+?                             +
+-         ReentrancyGuardUpgradeable,
++         ReentrancyGuardUpgradeable,
+?                                    +
+-         OwnableUpgradeable
++         OwnableUpgradeable
+?                           +
+- 
+- 
+- 
++ 
++ 
++ 
+- ## Impact
++ ## Impact
+?          +
+- 
++ 
+- There exists an inconsistency in that players NFTs implement the EIP2981 whereas that club NFTs do not, so marketplaces that do respect the EIP-2981 won't pay the royalties for the club NFTs, and this can be seen as a loss of "yield" for the developers of the footium protocol.
++ There exists an inconsistency in that players NFTs implement the EIP2981 whereas that club NFTs do not, so marketplaces that do respect the EIP-2981 won't pay the royalties for the club NFTs, and this can be seen as a loss of "yield" for the developers of the footium protocol.
+?                                                                                                                                                                                                                                                                                      +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- 
++ 
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14
+?                                                                                                                +
+- 
++ 
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+- 
++ 
+- Implement EIP2981 on `FootiumClub`.
++ Implement EIP2981 on `FootiumClub`.
+?                                    +
+- 
++ 
+- ## Note For Judge
++ ## Note For Judge
+?                  +
+- 
++ 
+- This issue was marked as `valid` and `Will Fix` during the last audit, but actually it is not fixed and not included in known issues/acceptable risks, so it is a valid medium.
++ This issue was marked as `valid` and `Will Fix` during the last audit, but actually it is not fixed and not included in known issues/acceptable risks, so it is a valid medium.
+?                                                                                                                                                                                +
+  Please watch [this](https://github.com/sherlock-audit/2023-04-footium-judging/issues/293#issuecomment-1559800052) for reference.

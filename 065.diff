@@ -1,0 +1,110 @@
+  Unique Rose Platypus
+  
+  high
+  
+  # detection of duplicate proofs in Merkle trees
+  
+- 
++ 
+- ---
++ ---
+?    +
+- name: Detection of Duplicate Proofs
++ name: Detection of Duplicate Proofs
+?                                    +
+- about: Audit item regarding detection of duplicate proofs in Merkle trees
++ about: Audit item regarding detection of duplicate proofs in Merkle trees
+?                                                                          +
+- title: Detection of Duplicate Proofs
++ title: Detection of Duplicate Proofs
+?                                     +
+- labels: Vulnerability, Merkle Tree
++ labels: Vulnerability, Merkle Tree
+?                                   +
+- assignees: ""
++ assignees: ""
+?              +
+- 
++ 
+- ## Summary
++ ## Summary
+?           +
+- The contract does not prevent the use of duplicate proofs within the Merkle tree.
++ The contract does not prevent the use of duplicate proofs within the Merkle tree.
+?                                                                                  +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- Lack of checks to prevent the reuse of previously claimed proofs (`claimETHPrize` and `claimERC20Prize`) can lead to potential double-spending or vulnerabilities.
++ Lack of checks to prevent the reuse of previously claimed proofs (`claimETHPrize` and `claimERC20Prize`) can lead to potential double-spending or vulnerabilities.
+?                                                                                                                                                                   +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- Risk of exploitation due to the absence of checks for duplicate proofs within the Merkle tree, potentially resulting in double-spending or other vulnerabilities.
++ Risk of exploitation due to the absence of checks for duplicate proofs within the Merkle tree, potentially resulting in double-spending or other vulnerabilities.
+?                                                                                                                                                                  +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- ```solidity
++ ```solidity
+?            +
+- mapping(bytes32 => bool) private usedProofs;
++ mapping(bytes32 => bool) private usedProofs;
+?                                             +
+- 
++ 
+- function claimETHPrize(
++ function claimETHPrize(
+?                        +
+-     // ... existing parameters ...
++     // ... existing parameters ...
+?                                   +
+- ) external whenNotPaused nonReentrant {
++ ) external whenNotPaused nonReentrant {
+?                                        +
+-     // Check if the proof has been used before
++     // Check if the proof has been used before
+?                                               +
+-     require(!usedProofs[keccak256(abi.encode(_to, _amount))], "Duplicate proof detected");
++     require(!usedProofs[keccak256(abi.encode(_to, _amount))], "Duplicate proof detected");
+?                                                                                           +
+-     
++     
+?     +
+-     // Mark the proof as used
++     // Mark the proof as used
+?                              +
+-     usedProofs[keccak256(abi.encode(_to, _amount))] = true;
++     usedProofs[keccak256(abi.encode(_to, _amount))] = true;
+?                                                            +
+- 
++ 
+-     // ... existing code ...
++     // ... existing code ...
+?                             +
+- }
++ }
+?  +
+- ```
++ ```
+?    +
+- ## Tool used
++ ## Tool used
+?             +
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  Enhance the verification process to detect and reject duplicate proofs during claim operations.

@@ -1,0 +1,207 @@
+  Deep Canvas Otter
+  
+  medium
+  
+  # Missing payable when claiming ETH
+  
+- ## Summary
++ ## Summary
+?           +
+- In `FootiumPrizeDistributor.sol` there is a function `claimETHPrize` 
++ In `FootiumPrizeDistributor.sol` there is a function `claimETHPrize` 
+?                                                                      +
+- ```solidity
++ ```solidity
+?            +
+-  function claimETHPrize(
++  function claimETHPrize(
+?                         +
+-         address _to,
++         address _to,
+?                     +
+-         uint256 _amount,
++         uint256 _amount,
+?                         +
+-         bytes32[] calldata _proof
++         bytes32[] calldata _proof
+?                                  +
+-     ) external whenNotPaused nonReentrant {
++     ) external whenNotPaused nonReentrant {
+?                                            +
+-         // Ensure that the prize receiver is the sender
++         // Ensure that the prize receiver is the sender
+?                                                        +
+-         if (_to != msg.sender) {
++         if (_to != msg.sender) {
+?                                 +
+-             revert InvalidAccount();
++             revert InvalidAccount();
+?                                     +
+-         }
++         }
+?          +
+- 
++ 
+-         // Checks the Merkle proof, which is constructed as a hash of
++         // Checks the Merkle proof, which is constructed as a hash of
+?                                                                      +
+-         // the token address, the receiver address and the amount
++         // the token address, the receiver address and the amount
+?                                                                  +
+-         if (
++         if (
+?             +
+-             !MerkleProofUpgradeable.verify(
++             !MerkleProofUpgradeable.verify(
+?                                            +
+-                 _proof,
++                 _proof,
+?                        +
+-                 ethMerkleRoot,
++                 ethMerkleRoot,
+?                               +
+-                 keccak256(abi.encode(_to, _amount))
++                 keccak256(abi.encode(_to, _amount))
+?                                                    +
+-             )
++             )
+?              +
+-         ) {
++         ) {
+?            +
+-             revert InvalidETHMerkleProof();
++             revert InvalidETHMerkleProof();
+?                                            +
+-         }
++         }
+?          +
+- 
++ 
+-         // The amount to be claimed is the difference between the total amount
++         // The amount to be claimed is the difference between the total amount
+?                                                                               +
+-         // and the amount already claimed.
++         // and the amount already claimed.
+?                                           +
+-         // This means that the amount passed in the function call is the total
++         // This means that the amount passed in the function call is the total
+?                                                                               +
+-         // amount that was ever earned by the user.
++         // amount that was ever earned by the user.
+?                                                    +
+-         uint256 value = _amount - totalETHClaimed[_to];
++         uint256 value = _amount - totalETHClaimed[_to];
+?                                                        +
+- 
++ 
+-         // If there is still an amount to be claimed, transfer the tokens
++         // If there is still an amount to be claimed, transfer the tokens
+?                                                                          +
+-         if (value > 0) {
++         if (value > 0) {
+?                         +
+-             totalETHClaimed[_to] += value;
++             totalETHClaimed[_to] += value;
+?                                           +
+- 
++ 
+-             (bool sent, ) = _to.call{value: value}("");  //@audit - missing  payable
++             (bool sent, ) = _to.call{value: value}("");  //@audit - missing  payable
+?                                                                                     +
+-             if (!sent) {
++             if (!sent) {
+?                         +
+-                 revert FailedToSendETH(value);
++                 revert FailedToSendETH(value);
+?                                               +
+-             }
++             }
+?              +
+-         }
++         }
+?          +
+- 
++ 
+-         emit ClaimETH(_to, value);
++         emit ClaimETH(_to, value);
+?                                   +
+-     }
++     }
+?      +
+- }
++ }
+?  +
+- ```
++ ```
+?    +
+-  The claimETHPrize function is responsible for transferring ETH tokens from the contract to the address specified by the _to parameter. However, the function does not explicitly mark the _to address as payable before attempting to send ETH to it. This means that the function assumes that the _to address has a receive() or payable fallback function, which is not always the case.
++  The claimETHPrize function is responsible for transferring ETH tokens from the contract to the address specified by the _to parameter. However, the function does not explicitly mark the _to address as payable before attempting to send ETH to it. This means that the function assumes that the _to address has a receive() or payable fallback function, which is not always the case.
+?                                                                                                                                                                                                                                                                                                                                                                                             +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- There is a missing payable before `_to` 
++ There is a missing payable before `_to` 
+?                                         +
+- Explicit conversion from address to address payable is only possible if the contract has a receive or payable fallback function. 
++ Explicit conversion from address to address payable is only possible if the contract has a receive or payable fallback function. 
+?                                                                                                                                  +
+- ## Impact
++ ## Impact
+?          +
+- Not all addresses are payable, and if you try to send ethers to a non-payable address, the transaction will fail.
++ Not all addresses are payable, and if you try to send ethers to a non-payable address, the transaction will fail.
+?                                                                                                                  +
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L195
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L195
+?                                                                                                                                  +
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+- 
++ 
+- Change:
++ Change:
+?        +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+- (bool sent, ) = _to.call{value: value}("");
++ (bool sent, ) = _to.call{value: value}("");
+?                                            +
+- ```
++ ```
+?    +
+- 
++ 
+- To:
++ To:
+?    +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+- (bool sent, ) = payable(_to).call{value: value}("");
++ (bool sent, ) = payable(_to).call{value: value}("");
+?                                                     +
+- ```
++ ```
+?    +

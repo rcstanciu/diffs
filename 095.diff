@@ -1,0 +1,240 @@
+  Glorious Shamrock Goldfish
+  
+  high
+  
+  # Lack of token makePayment method , suggest add a `makeTokenPayment` method in `FootiumGeneralPaymentContract`
+  
+- ## Summary
++ ## Summary
+?           +
+- Lack of token makePayment method , suggest add a `makeTokenPayment` method in `FootiumGeneralPaymentContract`
++ Lack of token makePayment method , suggest add a `makeTokenPayment` method in `FootiumGeneralPaymentContract`
+?                                                                                                              +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- User can call `claimETHPrize` or `claimERC20Prize`in `PriceDistributor` contract, so the distributor should can receive both ETH and token from `GeneralPayment` contract .
++ User can call `claimETHPrize` or `claimERC20Prize`in `PriceDistributor` contract, so the distributor should can receive both ETH and token from `GeneralPayment` contract .
+?                                                                                                                                                                            +
+- 
++ 
+- suggest the token payment method to match ETH payment .
++ suggest the token payment method to match ETH payment .
+?                                                        +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- The Prize distributor contract cannot receive token from `FootiumGeneralPaymentContract` .
++ The Prize distributor contract cannot receive token from `FootiumGeneralPaymentContract` .
+?                                                                                           +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L109-L114
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L109-L114
+?                                                                                                                                  +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+-  function claimERC20Prize(
++  function claimERC20Prize(
+?                           +
+-         address _to,
++         address _to,
+?                     +
+-         IERC20Upgradeable _token,
++         IERC20Upgradeable _token,
+?                                  +
+-         uint256 _amount,
++         uint256 _amount,
+?                         +
+-         bytes32[] calldata _proof
++         bytes32[] calldata _proof
+?                                  +
+-     ) external whenNotPaused nonReentrant {
++     ) external whenNotPaused nonReentrant {
+?                                            +
+- ```
++ ```
+?    +
+- 
++ 
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L160
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPrizeDistributor.sol#L155-L160
+?                                                                                                                                  +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+-   function claimETHPrize(
++   function claimETHPrize(
+?                          +
+-         address _to,
++         address _to,
+?                     +
+-         uint256 _amount,
++         uint256 _amount,
+?                         +
+-         bytes32[] calldata _proof
++         bytes32[] calldata _proof
+?                                  +
+-     ) external whenNotPaused nonReentrant {
++     ) external whenNotPaused nonReentrant {
+?                                            +
+- ```
++ ```
+?    +
+- 
++ 
+- https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L84-L107
++ https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumGeneralPaymentContract.sol#L84-L107
+?                                                                                                                                       +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+-    function makePayment(uint256 _clubId, string calldata _message)
++    function makePayment(uint256 _clubId, string calldata _message)
+?                                                                   +
+-         external
++         external
+?                 +
+-         payable
++         payable
+?                +
+-         whenNotPaused
++         whenNotPaused
+?                      +
+-         nonReentrant
++         nonReentrant
+?                     +
+-     {
++     {
+?      +
+-         // Require that the sender is the owner of the club
++         // Require that the sender is the owner of the club
+?                                                            +
+-         if (msg.sender != footiumClub.ownerOf(_clubId)) {
++         if (msg.sender != footiumClub.ownerOf(_clubId)) {
+?                                                          +
+-             revert NotClubOwner(_clubId, msg.sender);
++             revert NotClubOwner(_clubId, msg.sender);
+?                                                      +
+-         }
++         }
+?          +
+- 
++ 
+-         // Require that the payment amount is greater than 0
++         // Require that the payment amount is greater than 0
+?                                                             +
+-         if (msg.value <= 0) {
++         if (msg.value <= 0) {
+?                              +
+-             revert IncorrectETHAmount(msg.value);
++             revert IncorrectETHAmount(msg.value);
+?                                                  +
+-         }
++         }
+?          +
+- 
++ 
+-         // Send the payment to the payment receiver address
++         // Send the payment to the payment receiver address
+?                                                            +
+-         (bool sent, ) = paymentReceiverAddress.call{value: msg.value}("");
++         (bool sent, ) = paymentReceiverAddress.call{value: msg.value}("");
+?                                                                           +
+-         if (!sent) {
++         if (!sent) {
+?                     +
+-             revert FailedToSendETH(msg.value);
++             revert FailedToSendETH(msg.value);
+?                                               +
+-         }
++         }
+?          +
+- 
++ 
+-         emit PaymentMade(_clubId, msg.value, _message);
++         emit PaymentMade(_clubId, msg.value, _message);
+?                                                        +
+-     }
++     }
+?      +
+- ```
++ ```
+?    +
+- 
++ 
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review ,VScode
++ Manual Review ,VScode
+?                      +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+- suggest add a `makeTokenPayment` method in `FootiumGeneralPaymentContract`
++ suggest add a `makeTokenPayment` method in `FootiumGeneralPaymentContract`
+?                                                                           +
+- 
++ 
+- pseudo code
++ pseudo code
+?            +
+- 
++ 
+- ```solidity
++ ```solidity
+?            +
+-   function makeTokenPayment(uint256 _clubId, address token,  uint256 amount,  string calldata _message)external  whenNotPaused nonReentrant {
++   function makeTokenPayment(uint256 _clubId, address token,  uint256 amount,  string calldata _message)external  whenNotPaused nonReentrant {
+?                                                                                                                                              +
+-         if (msg.sender != footiumClub.ownerOf(_clubId)) {
++         if (msg.sender != footiumClub.ownerOf(_clubId)) {
+?                                                          +
+-             revert NotClubOwner(_clubId, msg.sender);
++             revert NotClubOwner(_clubId, msg.sender);
+?                                                      +
+-         }
++         }
+?          +
+-         if(amount <0){
++         if(amount <0){
+?                       +
+-             revert IncorrectTokenAmount(amount);
++             revert IncorrectTokenAmount(amount);
+?                                                 +
+-         }
++         }
+?          +
+-         IERC20Upgradeable(token).safeTransferFrom(msg.sender, paymentReceiverAddress, amount);
++         IERC20Upgradeable(token).safeTransferFrom(msg.sender, paymentReceiverAddress, amount);
+?                                                                                               +
+-         emit TokenPaymentMade(_clubId, amount, _message);
++         emit TokenPaymentMade(_clubId, amount, _message);
+?                                                          +
+-     }
++     }
+?      +
+- ```
++ ```
+?    +
+- 
++ 

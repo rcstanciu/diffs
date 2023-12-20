@@ -1,0 +1,112 @@
+  Dancing Tangerine Trout
+  
+  medium
+  
+  # Issue raised in previous audit has not fixed.
+  
+- ## Summary
++ ## Summary
+?           +
+- In the given previous audit report - (Issue M-4: Users can bypass Player royalties on EIP2981 compatible markets by selling clubs as a whole) is accepted but not fixed.
++ In the given previous audit report - (Issue M-4: Users can bypass Player royalties on EIP2981 compatible markets by selling clubs as a whole) is accepted but not fixed.
+?                                                                                                                                                                         +
+- 
++ 
+- ## Vulnerability Detail
++ ## Vulnerability Detail
+?                        +
+- [[FootiumPlayer.sol#L16-L23](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L16-L23)
++ [[FootiumPlayer.sol#L16-L23](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumPlayer.sol#L16-L23)
+?                                                                                                                                                    +
+- 
++ 
+- contract FootiumPlayer is
++ contract FootiumPlayer is
+?                          +
+-     ERC721Upgradeable,
++     ERC721Upgradeable,
+?                       +
+-     AccessControlUpgradeable,
++     AccessControlUpgradeable,
+?                              +
+-     ERC2981Upgradeable,
++     ERC2981Upgradeable,
+?                        +
+-     PausableUpgradeable,
++     PausableUpgradeable,
+?                         +
+-     ReentrancyGuardUpgradeable,
++     ReentrancyGuardUpgradeable,
+?                                +
+-     OwnableUpgradeable
++     OwnableUpgradeable
+?                       +
+- {
++ {
+?  +
+- FootiumPlayer implements the EIP2981 standard which creates fees when buy/selling the players.
++ FootiumPlayer implements the EIP2981 standard which creates fees when buy/selling the players.
+?                                                                                               +
+- 
++ 
+- [[FootiumClub.sol#L14-L20](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L20)
++ [[FootiumClub.sol#L14-L20](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L20)
+?                                                                                                                                                +
+- 
++ 
+- contract FootiumClub is
++ contract FootiumClub is
+?                        +
+-     ERC721Upgradeable,
++     ERC721Upgradeable,
+?                       +
+-     AccessControlUpgradeable,
++     AccessControlUpgradeable,
+?                              +
+-     PausableUpgradeable,
++     PausableUpgradeable,
+?                         +
+-     ReentrancyGuardUpgradeable,
++     ReentrancyGuardUpgradeable,
+?                                +
+-     OwnableUpgradeable
++     OwnableUpgradeable
+?                       +
+- {
++ {
+?  +
+- FootiumClub does not implement this standard.
++ FootiumClub does not implement this standard.
+?                                              +
+- 
++ 
+- ## Impact
++ ## Impact
+?          +
+- No EIP2981 implementation in clubs to pay the protocol royalties on sale
++ No EIP2981 implementation in clubs to pay the protocol royalties on sale
+?                                                                         +
+- 
++ 
+- ## Code Snippet
++ ## Code Snippet
+?                +
+- [FootiumClub.sol#L14-L20](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L20)
++ [FootiumClub.sol#L14-L20](https://github.com/sherlock-audit/2023-12-footium/blob/main/footium-eth-shareable/contracts/FootiumClub.sol#L14-L20)
+?                                                                                                                                               +
+- 
++ 
+- ## Tool used
++ ## Tool used
+?             +
+- 
++ 
+- Manual Review
++ Manual Review
+?              +
+- 
++ 
+- ## Recommendation
++ ## Recommendation
+?                  +
+  Same as previous report - Implement EIP2981 on clubs as well
